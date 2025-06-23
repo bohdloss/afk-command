@@ -1,20 +1,12 @@
 package com.aylanj123.afkcommand;
 
-import com.aylanj123.afkcommand.eventhandler.*;
+import com.aylanj123.afkcommand.registry.AttachmentsRegistry;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeConfig;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.util.thread.SidedThreadGroups;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import org.slf4j.Logger;
 
 @Mod(AFKCommandMod.MODID)
@@ -25,11 +17,11 @@ public class AFKCommandMod
     // slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public AFKCommandMod()
+    public AFKCommandMod(IEventBus modEventBus, ModContainer modContainer)
     {
-        MinecraftForge.EVENT_BUS.register(ServerEventHandler.ServerForgeEvents.class);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC, MODID + "-server.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC, MODID + "-client.toml");
+        AttachmentsRegistry.register(modEventBus);
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC, MODID + "-server.toml");
+        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC, MODID + "-client.toml");
     }
 
 }

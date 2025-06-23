@@ -5,12 +5,22 @@ import com.aylanj123.afkcommand.Config;
 import com.aylanj123.afkcommand.LangKeys;
 import com.aylanj123.afkcommand.networking.PacketHandler;
 import com.aylanj123.afkcommand.networking.packets.GoneAFKS2CPacket;
+import com.aylanj123.afkcommand.registry.CapabilitiesRegistry;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.NotNull;
 
-public class PlayerAFKState {
+import java.util.Objects;
+
+public class PlayerAFKState implements INBTSerializable<CompoundTag> {
+
+    public static @NotNull PlayerAFKState get(@NotNull Player player) {
+        return Objects.requireNonNull(player.getCapability(CapabilitiesRegistry.AFK_STATE));
+    }
 
     private boolean afk;
     private StateSource source;
@@ -83,4 +93,23 @@ public class PlayerAFKState {
         player.serverLevel().updateSleepingPlayerList();
     }
 
+    @Override
+    public CompoundTag serializeNBT(HolderLookup.@NotNull Provider provider) {
+        var tag = new CompoundTag();
+        tag.putBoolean("afk", afk);
+        tag.putString("source", source == null ? "" : source.intoString());
+        tag.putInt("time_afk", timeAFK);
+        tag.putLong("last_time_afk", lastTimeAFK);
+        tag.putLong("last_time_combat", lastTimeCombat);
+        return null;
+    }
+
+    @Override
+    public void deserializeNBT(HolderLookup.@NotNull Provider provider, @NotNull CompoundTag tag) {
+        afk = tag.getBoolean("afk");
+        source = StateSource.fromString(tag.getString("source"));
+        timeAFK = tag.getInt("time_afk");
+        lastTimeAFK = tag.getLong("last_time_afk");
+        lastTimeCombat = tag.getLong("last_time_combat");
+    }
 }

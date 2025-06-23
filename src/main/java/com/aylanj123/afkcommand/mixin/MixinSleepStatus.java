@@ -1,6 +1,7 @@
 package com.aylanj123.afkcommand.mixin;
 
 import com.aylanj123.afkcommand.AFKCommandMod;
+import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKState;
 import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKStateProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.SleepStatus;
@@ -39,14 +40,13 @@ public class MixinSleepStatus {
         this.sleepingPlayers = 0;
 
         for(ServerPlayer serverplayer : pPlayers) {
-            serverplayer.getCapability(PlayerAFKStateProvider.AFK_STATE).ifPresent(cap -> {
-                if (!serverplayer.isSpectator() && !cap.isAFK()) {
-                    ++this.activePlayers;
-                    if (serverplayer.isSleeping()) {
-                        ++this.sleepingPlayers;
-                    }
+            PlayerAFKState cap = PlayerAFKState.get(serverplayer);
+            if (!serverplayer.isSpectator() && !cap.isAFK()) {
+                ++this.activePlayers;
+                if (serverplayer.isSleeping()) {
+                    ++this.sleepingPlayers;
                 }
-            });
+            }
         }
 
         return (j > 0 || this.sleepingPlayers > 0) && (i != this.activePlayers || j != this.sleepingPlayers);

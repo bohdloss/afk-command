@@ -5,16 +5,15 @@ import com.aylanj123.afkcommand.networking.PacketHandler;
 import com.aylanj123.afkcommand.networking.packets.IdledC2SPacket;
 import com.aylanj123.afkcommand.networking.stateholder.ClientAFKStateHolder;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 public class ClientEventHandler {
 
-    @Mod.EventBusSubscriber(modid = AFKCommandMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = AFKCommandMod.MODID, value = Dist.CLIENT)
     public static class ClientModEvents {
 
         @SubscribeEvent
@@ -25,11 +24,11 @@ public class ClientEventHandler {
 
     }
 
-    @Mod.EventBusSubscriber(modid = AFKCommandMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = AFKCommandMod.MODID, value = Dist.CLIENT)
     public static class ClientForgeEvents {
         @SubscribeEvent
-        static void clientTick(TickEvent.ClientTickEvent event) {
-            if (event.side != LogicalSide.CLIENT || Minecraft.getInstance().player == null) return;
+        static void clientTick(ClientTickEvent.Post event) {
+            if (Minecraft.getInstance().player == null) return;
             if (++ClientAFKStateHolder.currentIdleTime > ClientAFKStateHolder.timeIdle) {
                 ClientAFKStateHolder.currentIdleTime = 0;
                 PacketHandler.sendServer(new IdledC2SPacket());

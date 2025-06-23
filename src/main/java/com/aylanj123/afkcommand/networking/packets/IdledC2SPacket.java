@@ -1,40 +1,40 @@
 package com.aylanj123.afkcommand.networking.packets;
 
-import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKStateProvider;
+import com.aylanj123.afkcommand.AFKCommandMod;
+import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKState;
 import com.aylanj123.afkcommand.afkstate.capability.StateSource;
-import net.minecraft.network.FriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+public class IdledC2SPacket implements CustomPacketPayload {
 
-public class IdledC2SPacket {
+    public static final CustomPacketPayload.Type<IdledC2SPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(AFKCommandMod.MODID, "idled_c2s_packet"));
 
-    public IdledC2SPacket() {
+    public static final StreamCodec<ByteBuf, IdledC2SPacket> CODEC = StreamCodec.unit(new IdledC2SPacket());
 
-    }
+    public IdledC2SPacket() {}
 
-    public IdledC2SPacket(FriendlyByteBuf buffer) {
-        this();
-    }
-
-    public void encode(FriendlyByteBuf buffer) {
-
-    }
-
-    public void handle(Supplier<NetworkEvent.ClientCustomPayloadEvent.Context> cxSupplier) {
-        NetworkEvent.Context cx = cxSupplier.get();
-        ServerPlayer player = cx.getSender();
+    public void handle(IPayloadContext cx) {
+        ServerPlayer player = (ServerPlayer) cx.player();
         if (player == null) {
-            cx.setPacketHandled(false);
             return;
         }
-        player.getCapability(PlayerAFKStateProvider.AFK_STATE).ifPresent(cap -> {
-            if (!cap.isAFK()) cap.putAFK(StateSource.IDLED_TOO_LONG, player);
-        });
-        cx.setPacketHandled(true);
+        PlayerAFKState cap = PlayerAFKState.get(player);
+        if (!cap.isAFK()) cap.putAFK(StateSource.IDLED_TOO_LONG, player);
     }
 
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass().equals(IdledC2SPacket.class);
+    }
 }

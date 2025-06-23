@@ -1,28 +1,22 @@
 package com.aylanj123.afkcommand;
 
-import com.aylanj123.afkcommand.AFKCommandMod;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class Config
 {
-    private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
-    private static final ForgeConfigSpec.Builder CLIENT_BUILDER = new ForgeConfigSpec.Builder();
-    public static final ForgeConfigSpec SERVER_SPEC;
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec SERVER_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
-    private static final ForgeConfigSpec.ConfigValue<Boolean> INVINCIBLE_PLAYERS;
-    private static final ForgeConfigSpec.ConfigValue<Integer> COMBAT_TIME;
-    private static final ForgeConfigSpec.ConfigValue<Integer> AFK_KICK_TIME;
-    private static final ForgeConfigSpec.ConfigValue<Integer> AUTO_AFK_TIME;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> AFK_ON_LOGIN;
-    private static final ForgeConfigSpec.ConfigValue<Integer> AFK_COOLDOWN;
+    private static final ModConfigSpec.ConfigValue<Boolean> INVINCIBLE_PLAYERS;
+    private static final ModConfigSpec.ConfigValue<Integer> COMBAT_TIME;
+    private static final ModConfigSpec.ConfigValue<Integer> AFK_KICK_TIME;
+    private static final ModConfigSpec.ConfigValue<Integer> AUTO_AFK_TIME;
+    private static final ModConfigSpec.ConfigValue<Boolean> AFK_ON_LOGIN;
+    private static final ModConfigSpec.ConfigValue<Integer> AFK_COOLDOWN;
 
-    private static final ForgeConfigSpec.ConfigValue<Boolean> CHAT_CONFIRMATION;
+    private static final ModConfigSpec.ConfigValue<Boolean> CHAT_CONFIRMATION;
 
     static {
         SERVER_BUILDER.push("Configs for AFK Command mod - Server Sided -");

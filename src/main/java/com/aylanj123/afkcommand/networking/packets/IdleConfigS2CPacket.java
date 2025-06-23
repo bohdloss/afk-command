@@ -1,18 +1,25 @@
 package com.aylanj123.afkcommand.networking.packets;
 
 
-import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKStateProvider;
-import com.aylanj123.afkcommand.afkstate.capability.StateSource;
+import com.aylanj123.afkcommand.AFKCommandMod;
 import com.aylanj123.afkcommand.networking.stateholder.ClientAFKStateHolder;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+public class IdleConfigS2CPacket implements CustomPacketPayload {
 
-public class IdleConfigS2CPacket {
+    public static final CustomPacketPayload.Type<IdleConfigS2CPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(AFKCommandMod.MODID, "idle_config_s2c_packet"));
+
+    public static final StreamCodec<ByteBuf, IdleConfigS2CPacket> CODEC = StreamCodec.composite(
+            ByteBufCodecs.VAR_INT,
+            (x) -> x.time,
+            IdleConfigS2CPacket::new
+    );
 
     int time;
 
@@ -20,18 +27,12 @@ public class IdleConfigS2CPacket {
         this.time = time;
     }
 
-    public IdleConfigS2CPacket(FriendlyByteBuf buffer) {
-        this(buffer.readInt());
-    }
-
-    public void encode(FriendlyByteBuf buffer) {
-        buffer.writeInt(this.time);
-    }
-
-    public void handle(Supplier<NetworkEvent.ServerCustomPayloadEvent.Context> cxSupplier) {
-        NetworkEvent.Context cx = cxSupplier.get();
+    public void handle(IPayloadContext cx) {
         ClientAFKStateHolder.timeIdle = time;
-        cx.setPacketHandled(true);
     }
 
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 }

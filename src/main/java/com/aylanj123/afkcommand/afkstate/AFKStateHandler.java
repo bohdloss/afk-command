@@ -3,6 +3,7 @@ package com.aylanj123.afkcommand.afkstate;
 import com.aylanj123.afkcommand.AFKCommandMod;
 import com.aylanj123.afkcommand.Config;
 import com.aylanj123.afkcommand.LangKeys;
+import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKState;
 import com.aylanj123.afkcommand.afkstate.capability.PlayerAFKStateProvider;
 import com.aylanj123.afkcommand.afkstate.capability.StateSource;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AFKStateHandler {
@@ -48,18 +50,19 @@ public class AFKStateHandler {
         AtomicBoolean success = new AtomicBoolean(false);
         if (self) {
             AtomicBoolean commandError = new AtomicBoolean(true);
-            player.getCapability(PlayerAFKStateProvider.AFK_STATE).ifPresent(cap -> {
-                if (cap.isAFK()) return;
+            PlayerAFKState cap = PlayerAFKState.get(player);
+            do {
+                if (cap.isAFK()) break;
                 if (Config.invinciblePlayers) {
                     if (Config.combatTime + cap.getLastTimeCombat() > player.serverLevel().getGameTime()) {
                         long timeLeft = (Config.combatTime + cap.getLastTimeCombat() - player.serverLevel().getGameTime()) / 20;
                         player.displayClientMessage(Component.translatable(LangKeys.STATE_ERROR_COMBAT.key(), String.valueOf(timeLeft)), true);
                         commandError.set(false);
-                        return;
+                        break;
                     } else if (getMonstersNearby(player)) {
                         player.displayClientMessage(Component.translatable(LangKeys.STATE_ERROR_MONSTERS.key()), true);
                         commandError.set(false);
-                        return;
+                        break;
                     }
                 }
                 if (
@@ -71,23 +74,24 @@ public class AFKStateHandler {
                     long timeLeft = (Config.afkCooldown + cap.getLastTimeAFK() - player.serverLevel().getGameTime()) / 20;
                     player.displayClientMessage(Component.translatable(LangKeys.STATE_ERROR_COOLDOWN.key(), String.valueOf(timeLeft)), true);
                     commandError.set(false);
-                    return;
+                    break;
                 }
                 if (Config.chatConfirmation) cx.getSource().sendSuccess(() -> Component.translatable(LangKeys.COMMAND_ANSWER_ENTER.key()), false);
                 AFKCommandMod.LOGGER.info(player.getName().getString() + " has gone AFK");
                 cap.putAFK(StateSource.SELF_APPLY, player);
                 success.set(true);
-            });
+            } while(false);
             if (success.get()) return 1;
             else if (commandError.get()) throw STATE_APPLIED_SELF.create();
         } else {
-            player.getCapability(PlayerAFKStateProvider.AFK_STATE).ifPresent(cap -> {
-                if (cap.isAFK()) return;
+            PlayerAFKState cap = PlayerAFKState.get(player);
+            do {
+                if (cap.isAFK()) break;
                 success.set(true);
                 cx.getSource().sendSuccess(() -> Component.translatable(LangKeys.COMMAND_ANSWER_OTHER.key()), false);
                 AFKCommandMod.LOGGER.info(player.getName().getString() + " has been put AFK");
                 cap.putAFK(StateSource.OPERATOR_APPLIED, player);
-            });
+            } while(false);
             if (success.get()) return 1;
             else throw STATE_APPLIED_OTHER.create();
         }

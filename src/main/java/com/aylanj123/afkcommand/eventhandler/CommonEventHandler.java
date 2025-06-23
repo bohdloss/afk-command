@@ -2,19 +2,22 @@ package com.aylanj123.afkcommand.eventhandler;
 import com.aylanj123.afkcommand.AFKCommandMod;
 import com.aylanj123.afkcommand.language.*;
 import com.aylanj123.afkcommand.networking.PacketHandler;
+import com.aylanj123.afkcommand.registry.CapabilitiesRegistry;
+import com.aylanj123.afkcommand.registry.CommandRegistry;
 import net.minecraft.data.DataProvider;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CommonEventHandler {
 
-    @Mod.EventBusSubscriber(modid = AFKCommandMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = AFKCommandMod.MODID)
     public static class CommonModEvents {
 
         private static final List<String> englishLocales = new ArrayList<>(List.of(
@@ -32,6 +35,18 @@ public class CommonEventHandler {
         private static final List<String> portugueseLocales = new ArrayList<>(List.of(
                 "pt_pt", "pt_br"
         ));
+
+        @SubscribeEvent
+        static void registerCommands(RegisterCommandsEvent event) {
+            AFKCommandMod.LOGGER.info("Setting up the commands");
+            CommandRegistry.register(event.getDispatcher());
+        }
+
+        @SubscribeEvent
+        static void registerCapabilities(RegisterCapabilitiesEvent event) {
+            AFKCommandMod.LOGGER.info("Setting up the capabilities");
+            CapabilitiesRegistry.register(event);
+        }
 
         @SubscribeEvent
         static void gatherData(GatherDataEvent event) {
@@ -70,7 +85,6 @@ public class CommonEventHandler {
         @SubscribeEvent
         static void commonSetUp(FMLCommonSetupEvent event) {
             AFKCommandMod.LOGGER.info("Common Set Up");
-            PacketHandler.register();
         }
 
     }
